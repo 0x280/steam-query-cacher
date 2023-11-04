@@ -4,7 +4,9 @@ use tokio::sync::RwLock;
 
 use crate::client::{
     packets::{
-        a2s_info::A2SInfo, a2s_info_reply::A2SInfoReply, SourceQueryRequest, SourceQueryResponse, a2s_player::A2SPlayer, a2s_player_reply::A2SPlayerReply, a2s_rules::A2SRules, a2s_rules_reply::A2SRulesReply,
+        a2s_info::A2SInfo, a2s_info_reply::A2SInfoReply, a2s_player::A2SPlayer,
+        a2s_player_reply::A2SPlayerReply, a2s_rules::A2SRules, a2s_rules_reply::A2SRulesReply,
+        SourceQueryRequest, SourceQueryResponse,
     },
     SteamQueryClient,
 };
@@ -66,9 +68,18 @@ pub struct QueryCacheManager {
 impl QueryCacheManager {
     pub fn new(client: Arc<SteamQueryClient>) -> Self {
         Self {
-            a2s_info: QueryCache::<A2SInfo, A2SInfoReply>::new(client.clone(), Some(time::Duration::from_secs(10))),
-            a2s_player: QueryCache::<A2SPlayer, A2SPlayerReply>::new(client.clone(), Some(time::Duration::from_secs(5))),
-            a2s_rules: QueryCache::<A2SRules, A2SRulesReply>::new(client.clone(), Some(time::Duration::from_secs(60))),
+            a2s_info: QueryCache::<A2SInfo, A2SInfoReply>::new(
+                client.clone(),
+                Some(time::Duration::from_secs(10)),
+            ),
+            a2s_player: QueryCache::<A2SPlayer, A2SPlayerReply>::new(
+                client.clone(),
+                Some(time::Duration::from_secs(5)),
+            ),
+            a2s_rules: QueryCache::<A2SRules, A2SRulesReply>::new(
+                client.clone(),
+                Some(time::Duration::from_secs(60)),
+            ),
         }
     }
 

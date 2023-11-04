@@ -8,8 +8,8 @@ use tokio::{
 
 use crate::client::{
     packets::{
-        a2s_info::A2SInfo, s2c_challenge::S2CChallenge, QueryHeader, SourceChallenge,
-        SOURCE_PACKET_HEADER, a2s_player::A2SPlayer, a2s_rules::A2SRules,
+        a2s_info::A2SInfo, a2s_player::A2SPlayer, a2s_rules::A2SRules, s2c_challenge::S2CChallenge,
+        QueryHeader, SourceChallenge, SOURCE_PACKET_HEADER,
     },
     SteamQueryClient,
 };
@@ -87,7 +87,10 @@ impl Connection {
 
             let header = i32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]);
             if header != SOURCE_PACKET_HEADER {
-                log::warn!("Received packet with invalid packet header from {}", self.addr);
+                log::warn!(
+                    "Received packet with invalid packet header from {}",
+                    self.addr
+                );
                 return Ok(());
             }
 
@@ -95,11 +98,7 @@ impl Connection {
                 Ok(header) => header,
                 Err(e) => {
                     // TODO: blacklist ip
-                    log::warn!(
-                        "Received invalid packet from {}: {}",
-                        self.addr,
-                        e
-                    );
+                    log::warn!("Received invalid packet from {}: {}", self.addr, e);
                     return Ok(());
                 }
             };
@@ -152,11 +151,7 @@ impl Connection {
                 let packet: A2SPlayer = match A2SPlayer::try_from(&buf.as_slice()[4..]) {
                     Ok(packet) => packet,
                     Err(e) => {
-                        log::warn!(
-                            "Received invalid packet from {}: {}",
-                            self.addr,
-                            e
-                        );
+                        log::warn!("Received invalid packet from {}: {}", self.addr, e);
                         return Ok(());
                     }
                 };
@@ -196,11 +191,7 @@ impl Connection {
                 let packet: A2SRules = match A2SRules::try_from(&buf.as_slice()[4..]) {
                     Ok(packet) => packet,
                     Err(e) => {
-                        log::warn!(
-                            "Received invalid packet from {}: {}",
-                            self.addr,
-                            e
-                        );
+                        log::warn!("Received invalid packet from {}: {}", self.addr, e);
                         return Ok(());
                     }
                 };

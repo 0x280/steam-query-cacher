@@ -73,7 +73,9 @@ impl TryFrom<&[u8]> for A2SPlayer {
         }
 
         let challenge = if value.len() > 1 {
-            Some(SourceChallenge::from_le_bytes([value[1], value[2], value[3], value[4]]))
+            Some(SourceChallenge::from_le_bytes([
+                value[1], value[2], value[3], value[4],
+            ]))
         } else {
             None
         };

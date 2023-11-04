@@ -5,8 +5,9 @@ use tokio::net::{ToSocketAddrs, UdpSocket};
 use packets::a2s_info::A2SInfo;
 
 use self::packets::{
-    a2s_info_reply::A2SInfoReply, QueryHeader, SourceQueryRequest, SourceQueryResponse,
-    SOURCE_PACKET_HEADER, SOURCE_SIMPLE_PACKET_MAX_SIZE, a2s_player_reply::A2SPlayerReply, a2s_player::A2SPlayer, a2s_rules_reply::A2SRulesReply, a2s_rules::A2SRules,
+    a2s_info_reply::A2SInfoReply, a2s_player::A2SPlayer, a2s_player_reply::A2SPlayerReply,
+    a2s_rules::A2SRules, a2s_rules_reply::A2SRulesReply, QueryHeader, SourceQueryRequest,
+    SourceQueryResponse, SOURCE_PACKET_HEADER, SOURCE_SIMPLE_PACKET_MAX_SIZE,
 };
 
 #[derive(Debug)]
@@ -135,7 +136,7 @@ impl SteamQueryClient {
 
         self.query::<A2SInfo, A2SInfoReply>(packet).await
     }
-    
+
     #[allow(dead_code)]
     pub async fn a2s_player(&self) -> std::io::Result<A2SPlayerReply> {
         let packet: A2SPlayer = A2SPlayer::new();

@@ -2,11 +2,11 @@
 
 pub mod a2s_info;
 pub mod a2s_info_reply;
-pub mod s2c_challenge;
 pub mod a2s_player;
 pub mod a2s_player_reply;
 pub mod a2s_rules;
 pub mod a2s_rules_reply;
+pub mod s2c_challenge;
 
 use std::fmt::Debug;
 
