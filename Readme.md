@@ -1,4 +1,4 @@
-# Steam Query Cacher
+# Steam Query Cacher [![build and test](https://github.com/0x280/steam-query-cacher/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/0x280/steam-query-cacher/actions/workflows/rust.yml)
 
 Proxy that lazy caches steam source server queries to prevent dos using ```A2S_INFO``` attacks.
 On windows you can set up a proxy for specific ports using the [netsh portproxy interface](https://learn.microsoft.com/en-us/windows-server/networking/technologies/netsh/netsh-interface-portproxy), on linux you can use [iptables](https://serverfault.com/questions/490594/redirect-local-traffic-to-proxy-port-with-iptables).
