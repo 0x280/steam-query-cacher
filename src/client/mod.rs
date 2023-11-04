@@ -6,7 +6,7 @@ use packets::a2s_info::A2SInfo;
 
 use self::packets::{
     a2s_info_reply::A2SInfoReply, QueryHeader, SourceQueryRequest, SourceQueryResponse,
-    SOURCE_PACKET_HEADER, SOURCE_SIMPLE_PACKET_MAX_SIZE,
+    SOURCE_PACKET_HEADER, SOURCE_SIMPLE_PACKET_MAX_SIZE, a2s_player_reply::A2SPlayerReply, a2s_player::A2SPlayer,
 };
 
 #[derive(Debug)]
@@ -134,6 +134,13 @@ impl SteamQueryClient {
         let packet: A2SInfo = A2SInfo::new();
 
         self.query::<A2SInfo, A2SInfoReply>(packet).await
+    }
+    
+    #[allow(dead_code)]
+    pub async fn a2s_player(&self) -> std::io::Result<A2SPlayerReply> {
+        let packet: A2SPlayer = A2SPlayer::new();
+
+        self.query::<A2SPlayer, A2SPlayerReply>(packet).await
     }
 
     pub async fn proxy_request(&self, request: Vec<u8>) -> std::io::Result<Vec<u8>> {

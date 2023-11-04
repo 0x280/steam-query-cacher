@@ -4,7 +4,7 @@ use tokio::sync::RwLock;
 
 use crate::client::{
     packets::{
-        a2s_info::A2SInfo, a2s_info_reply::A2SInfoReply, SourceQueryRequest, SourceQueryResponse,
+        a2s_info::A2SInfo, a2s_info_reply::A2SInfoReply, SourceQueryRequest, SourceQueryResponse, a2s_player::A2SPlayer, a2s_player_reply::A2SPlayerReply,
     },
     SteamQueryClient,
 };
@@ -59,16 +59,22 @@ where
 #[derive(Debug)]
 pub struct QueryCacheManager {
     a2s_info: QueryCache<A2SInfo, A2SInfoReply>,
+    a2s_player: QueryCache<A2SPlayer, A2SPlayerReply>,
 }
 
 impl QueryCacheManager {
     pub fn new(client: Arc<SteamQueryClient>) -> Self {
         Self {
-            a2s_info: QueryCache::<A2SInfo, A2SInfoReply>::new(client, None),
+            a2s_info: QueryCache::<A2SInfo, A2SInfoReply>::new(client.clone(), None),
+            a2s_player: QueryCache::<A2SPlayer, A2SPlayerReply>::new(client.clone(), None),
         }
     }
 
     pub async fn a2s_info(&self) -> Result<A2SInfoReply, std::io::Error> {
         self.a2s_info.query_cached().await
+    }
+
+    pub async fn a2s_player(&self) -> Result<A2SPlayerReply, std::io::Error> {
+        self.a2s_player.query_cached().await
     }
 }

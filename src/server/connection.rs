@@ -9,7 +9,7 @@ use tokio::{
 use crate::client::{
     packets::{
         a2s_info::A2SInfo, s2c_challenge::S2CChallenge, QueryHeader, SourceChallenge,
-        SOURCE_PACKET_HEADER,
+        SOURCE_PACKET_HEADER, a2s_player::A2SPlayer,
     },
     SteamQueryClient,
 };
@@ -87,7 +87,7 @@ impl Connection {
 
             let header = i32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]);
             if header != SOURCE_PACKET_HEADER {
-                log::warn!("Received packet with invalid header from {}", self.addr);
+                log::warn!("Received packet with invalid packet header from {}", self.addr);
                 return Ok(());
             }
 
@@ -95,7 +95,7 @@ impl Connection {
                 Ok(header) => header,
                 Err(e) => {
                     log::warn!(
-                        "Received packet with invalid header from {}: {}",
+                        "Received invalid packet from {}: {}",
                         self.addr,
                         e
                     );
@@ -108,7 +108,7 @@ impl Connection {
                     Ok(packet) => packet,
                     Err(e) => {
                         log::warn!(
-                            "Received packet with invalid header from {}: {}",
+                            "Received packet with invalid query header from {}: {}",
                             self.addr,
                             e
                         );
@@ -134,6 +134,50 @@ impl Connection {
                 }
 
                 let a2s_info = self.query_cache.a2s_info().await?;
+                let mut bytes: Vec<u8> = a2s_info.into();
+                i32::to_le_bytes(SOURCE_PACKET_HEADER)
+                    .iter()
+                    .for_each(|b| bytes.insert(0, *b));
+
+                log::trace!(
+                    "Sending {} bytes to {}: {:?}",
+                    bytes.len(),
+                    self.addr,
+                    bytes
+                );
+
+                self.send(bytes).await?;
+            } else if header == QueryHeader::A2SPlayer {
+                let packet: A2SPlayer = match A2SPlayer::try_from(&buf.as_slice()[4..]) {
+                    Ok(packet) => packet,
+                    Err(e) => {
+                        log::warn!(
+                            "Received invalid packet from {}: {}",
+                            self.addr,
+                            e
+                        );
+                        return Ok(());
+                    }
+                };
+
+                let challenge: SourceChallenge =
+                    self.challenge_cache.get_challenge(&self.addr).await;
+
+                if match packet.challenge {
+                    Some(challenge) => challenge != challenge,
+                    None => true,
+                } {
+                    log::trace!("Sending challenge to {}", self.addr);
+                    let s2c_challenge = S2CChallenge::new(challenge);
+                    let mut bytes: Vec<u8> = s2c_challenge.into();
+                    i32::to_le_bytes(SOURCE_PACKET_HEADER)
+                        .iter()
+                        .for_each(|b| bytes.insert(0, *b));
+                    self.send(bytes).await?;
+                    continue;
+                }
+
+                let a2s_info = self.query_cache.a2s_player().await?;
                 let mut bytes: Vec<u8> = a2s_info.into();
                 i32::to_le_bytes(SOURCE_PACKET_HEADER)
                     .iter()
