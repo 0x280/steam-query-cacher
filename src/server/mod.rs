@@ -25,7 +25,8 @@ pub struct SteamQueryCacheServer {
 impl SteamQueryCacheServer {
     pub async fn new(config: ServerConfig) -> std::io::Result<Self> {
         let socket: Arc<UdpSocket> = Arc::new(UdpSocket::bind(config.bind.clone()).await?);
-        let client: Arc<SteamQueryClient> = Arc::new(SteamQueryClient::new(config.host.clone()).await?);
+        let client: Arc<SteamQueryClient> =
+            Arc::new(SteamQueryClient::new(config.host.clone()).await?);
         let challenge_cache: Arc<ChallengeCache> = Arc::new(ChallengeCache::new().await);
         let query_cache: Arc<QueryCacheManager> = Arc::new(QueryCacheManager::new(client.clone()));
         Ok(Self {

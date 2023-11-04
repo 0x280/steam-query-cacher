@@ -3,7 +3,9 @@ use std::{sync::Arc, time};
 use tokio::sync::RwLock;
 
 use crate::client::{
-    packets::{SourceQueryRequest, SourceQueryResponse, a2s_info::A2SInfo, a2s_info_reply::A2SInfoReply},
+    packets::{
+        a2s_info::A2SInfo, a2s_info_reply::A2SInfoReply, SourceQueryRequest, SourceQueryResponse,
+    },
     SteamQueryClient,
 };
 
@@ -45,7 +47,10 @@ where
             .client
             .query::<Request, Response>(Request::new())
             .await?;
-        self.val.write().await.replace((val.clone(), time::Instant::now() + self.refresh_interval));
+        self.val
+            .write()
+            .await
+            .replace((val.clone(), time::Instant::now() + self.refresh_interval));
 
         Ok(val)
     }

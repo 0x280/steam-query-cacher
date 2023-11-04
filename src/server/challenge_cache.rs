@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 
-use crate::{timed_hashmap::TimedHashMap, client::packets::SourceChallenge};
+use crate::{client::packets::SourceChallenge, timed_hashmap::TimedHashMap};
 
 #[derive(Debug)]
 pub struct ChallengeCache {

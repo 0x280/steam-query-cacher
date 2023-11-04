@@ -30,7 +30,9 @@ pub enum QueryHeader {
     GSInfoReply = 0x6E,
 }
 
-pub trait SourceQueryResponse: for<'a> TryFrom<&'a [u8]> + Into<Vec<u8>> + Sized + Debug + Clone {
+pub trait SourceQueryResponse:
+    for<'a> TryFrom<&'a [u8]> + Into<Vec<u8>> + Sized + Debug + Clone
+{
     fn packet_header() -> QueryHeader;
 
     const SIZE: usize = std::mem::size_of::<Self>();

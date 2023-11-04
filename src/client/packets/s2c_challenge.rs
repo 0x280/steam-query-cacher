@@ -1,4 +1,4 @@
-use super::{QueryHeader, SourceQueryResponse, SourceChallenge};
+use super::{QueryHeader, SourceChallenge, SourceQueryResponse};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct S2CChallenge {
