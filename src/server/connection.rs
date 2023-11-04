@@ -9,7 +9,7 @@ use tokio::{
 use crate::client::{
     packets::{
         a2s_info::A2SInfo, s2c_challenge::S2CChallenge, QueryHeader, SourceChallenge,
-        SOURCE_PACKET_HEADER, a2s_player::A2SPlayer,
+        SOURCE_PACKET_HEADER, a2s_player::A2SPlayer, a2s_rules::A2SRules,
     },
     SteamQueryClient,
 };
@@ -94,6 +94,7 @@ impl Connection {
             let header: QueryHeader = match QueryHeader::try_from(buf[4]) {
                 Ok(header) => header,
                 Err(e) => {
+                    // TODO: blacklist ip
                     log::warn!(
                         "Received invalid packet from {}: {}",
                         self.addr,
@@ -177,8 +178,52 @@ impl Connection {
                     continue;
                 }
 
-                let a2s_info = self.query_cache.a2s_player().await?;
-                let mut bytes: Vec<u8> = a2s_info.into();
+                let a2s_player = self.query_cache.a2s_player().await?;
+                let mut bytes: Vec<u8> = a2s_player.into();
+                i32::to_le_bytes(SOURCE_PACKET_HEADER)
+                    .iter()
+                    .for_each(|b| bytes.insert(0, *b));
+
+                log::trace!(
+                    "Sending {} bytes to {}: {:?}",
+                    bytes.len(),
+                    self.addr,
+                    bytes
+                );
+
+                self.send(bytes).await?;
+            } else if header == QueryHeader::A2SRules {
+                let packet: A2SRules = match A2SRules::try_from(&buf.as_slice()[4..]) {
+                    Ok(packet) => packet,
+                    Err(e) => {
+                        log::warn!(
+                            "Received invalid packet from {}: {}",
+                            self.addr,
+                            e
+                        );
+                        return Ok(());
+                    }
+                };
+
+                let challenge: SourceChallenge =
+                    self.challenge_cache.get_challenge(&self.addr).await;
+
+                if match packet.challenge {
+                    Some(challenge) => challenge != challenge,
+                    None => true,
+                } {
+                    log::trace!("Sending challenge to {}", self.addr);
+                    let s2c_challenge = S2CChallenge::new(challenge);
+                    let mut bytes: Vec<u8> = s2c_challenge.into();
+                    i32::to_le_bytes(SOURCE_PACKET_HEADER)
+                        .iter()
+                        .for_each(|b| bytes.insert(0, *b));
+                    self.send(bytes).await?;
+                    continue;
+                }
+
+                let a2s_rules = self.query_cache.a2s_rules().await?;
+                let mut bytes: Vec<u8> = a2s_rules.into();
                 i32::to_le_bytes(SOURCE_PACKET_HEADER)
                     .iter()
                     .for_each(|b| bytes.insert(0, *b));
