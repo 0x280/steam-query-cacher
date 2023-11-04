@@ -15,3 +15,4 @@ Proxy that lazy caches steam source server queries to prevent dos using ```A2S_I
 ## WIP/Planned
 
 * Temporary ip blacklisting for invalid queries
+* Make logs more concise as they are very messy and dont follow a clean guideline atm
