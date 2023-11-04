@@ -42,7 +42,7 @@ impl SteamQueryClient {
         let mut buf: Vec<u8> = Vec::with_capacity(SOURCE_SIMPLE_PACKET_MAX_SIZE);
 
         tokio::select! {
-            _ = tokio::time::sleep(std::time::Duration::from_secs(1)) => {
+            _ = tokio::time::sleep(std::time::Duration::from_secs(5)) => {
                 return Err(std::io::Error::new(std::io::ErrorKind::TimedOut, "Timed out"));
             },
             result = self.socket.recv_buf(&mut buf) => {
@@ -142,7 +142,7 @@ impl SteamQueryClient {
         let mut buf: Vec<u8> = Vec::with_capacity(SOURCE_SIMPLE_PACKET_MAX_SIZE);
 
         tokio::select! {
-            _ = tokio::time::sleep(std::time::Duration::from_secs(1)) => {
+            _ = tokio::time::sleep(std::time::Duration::from_secs(5)) => {
                 return Err(std::io::Error::new(std::io::ErrorKind::TimedOut, "Timed out"));
             },
             result = self.socket.recv_buf(&mut buf) => {
