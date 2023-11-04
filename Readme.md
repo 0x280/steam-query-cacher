@@ -10,6 +10,7 @@ Proxy that lazy caches steam source server queries to prevent dos using ```A2S_I
 * No Goldsource support!
 * Hacked together tool, code quality is not good!
 * No support given, feel free to contribute tho
+* Code is by no way considered "clean" as it's a hacked together project to suit specific needs
 
 ## WIP/Planned
 

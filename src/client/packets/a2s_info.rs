@@ -11,14 +11,6 @@ pub struct A2SInfo {
 }
 
 impl A2SInfo {
-    pub fn new() -> Self {
-        Self {
-            header: QueryHeader::A2SInfo,
-            payload: A2S_INFO_REQUEST_PAYLOAD.to_string(),
-            challenge: None,
-        }
-    }
-
     pub fn with_challenge(challenge: SourceChallenge) -> Self {
         Self {
             header: QueryHeader::A2SInfo,
@@ -30,6 +22,14 @@ impl A2SInfo {
 
 impl SourceQueryRequest for A2SInfo {
     const SIZE: usize = 1 + A2S_INFO_REQUEST_PAYLOAD.len();
+
+    fn new() -> Self {
+        Self {
+            header: QueryHeader::A2SInfo,
+            payload: A2S_INFO_REQUEST_PAYLOAD.to_string(),
+            challenge: None,
+        }
+    }
 
     fn set_challenge(&mut self, challenge: SourceChallenge) {
         self.challenge = Some(challenge);

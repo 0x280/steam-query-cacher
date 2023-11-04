@@ -26,13 +26,13 @@ impl SteamQueryClient {
     }
 
     async fn send_packet<T: SourceQueryRequest>(&self, packet: T) -> std::io::Result<()> {
-        log::debug!("sending packet: {:?}", packet);
+        log::trace!("sending packet: {:?}", packet);
         let mut bytes: Vec<u8> = packet.into();
         i32::to_le_bytes(SOURCE_PACKET_HEADER)
             .iter()
             .for_each(|b| bytes.insert(0, *b));
 
-        log::debug!("sending packet bytes: {:?}", bytes);
+        log::trace!("sending packet bytes: {:?}", bytes);
         self.socket.send(&bytes).await?;
 
         Ok(())
@@ -42,19 +42,19 @@ impl SteamQueryClient {
         let mut buf: Vec<u8> = Vec::with_capacity(SOURCE_SIMPLE_PACKET_MAX_SIZE);
 
         tokio::select! {
-            _ = tokio::time::sleep(std::time::Duration::from_secs(5)) => {
+            _ = tokio::time::sleep(std::time::Duration::from_secs(1)) => {
                 return Err(std::io::Error::new(std::io::ErrorKind::TimedOut, "Timed out"));
             },
             result = self.socket.recv_buf(&mut buf) => {
                 result?;
             }
         }
-        log::debug!("received packet bytes: {:?}", buf);
+        log::trace!("received packet bytes: {:?}", buf);
 
         Ok(buf)
     }
 
-    async fn query<T: SourceQueryRequest, U: SourceQueryResponse>(
+    pub async fn query<T: SourceQueryRequest, U: SourceQueryResponse>(
         &self,
         mut packet: T,
     ) -> std::io::Result<U>
@@ -94,14 +94,14 @@ impl SteamQueryClient {
             };
 
             if header == QueryHeader::S2CChallenge {
-                log::debug!("Received challenge packet");
+                log::trace!("Received challenge packet");
                 let challenge: i32 = i32::from_le_bytes([
                     packet_bytes[1],
                     packet_bytes[2],
                     packet_bytes[3],
                     packet_bytes[4],
                 ]);
-                log::debug!("Challenge: {}", challenge);
+                log::trace!("Challenge: {}", challenge);
 
                 packet.set_challenge(challenge);
                 continue;
@@ -123,12 +123,13 @@ impl SteamQueryClient {
                     ))
                 }
             };
-            log::info!("Received packet: {:?}", packet);
+            log::trace!("Received packet: {:?}", packet);
 
             return Ok(packet);
         }
     }
 
+    #[allow(dead_code)]
     pub async fn a2s_info(&self) -> std::io::Result<A2SInfoReply> {
         let packet: A2SInfo = A2SInfo::new();
 
@@ -141,14 +142,14 @@ impl SteamQueryClient {
         let mut buf: Vec<u8> = Vec::with_capacity(SOURCE_SIMPLE_PACKET_MAX_SIZE);
 
         tokio::select! {
-            _ = tokio::time::sleep(std::time::Duration::from_secs(5)) => {
+            _ = tokio::time::sleep(std::time::Duration::from_secs(1)) => {
                 return Err(std::io::Error::new(std::io::ErrorKind::TimedOut, "Timed out"));
             },
             result = self.socket.recv_buf(&mut buf) => {
                 result?;
             }
         }
-        log::debug!("received packet bytes: {:?}", buf);
+        log::trace!("received packet bytes: {:?}", buf);
 
         Ok(buf)
     }

@@ -133,16 +133,6 @@ impl SteamQueryServer {
             set.spawn(async move { s.listen().await });
         }
 
-        set.spawn(async move {
-            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-            log::info!("Connecting to server");
-            let client = SteamQueryClient::new("127.0.0.1:28165").await?;
-            log::info!("Sending info request");
-            let info = client.a2s_info().await?;
-            log::info!("Received info: {:?}", info);
-            Ok(())
-        });
-
         while let Some(result) = set.join_next().await {
             if let Err(e) = result {
                 log::error!("Failed to listen on server: {}", e);

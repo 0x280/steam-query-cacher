@@ -2,6 +2,7 @@
 
 pub mod a2s_info;
 pub mod a2s_info_reply;
+pub mod s2c_challenge;
 
 use std::fmt::Debug;
 
@@ -29,7 +30,7 @@ pub enum QueryHeader {
     GSInfoReply = 0x6E,
 }
 
-pub trait SourceQueryResponse: for<'a> TryFrom<&'a [u8]> + Into<Vec<u8>> + Sized + Debug {
+pub trait SourceQueryResponse: for<'a> TryFrom<&'a [u8]> + Into<Vec<u8>> + Sized + Debug + Clone {
     fn packet_header() -> QueryHeader;
 
     const SIZE: usize = std::mem::size_of::<Self>();
@@ -38,5 +39,6 @@ pub trait SourceQueryResponse: for<'a> TryFrom<&'a [u8]> + Into<Vec<u8>> + Sized
 pub trait SourceQueryRequest: for<'a> TryFrom<&'a [u8]> + Into<Vec<u8>> + Debug + Clone {
     const SIZE: usize = std::mem::size_of::<Self>();
 
+    fn new() -> Self;
     fn set_challenge(&mut self, challenge: SourceChallenge);
 }

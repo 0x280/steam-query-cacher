@@ -1,4 +1,6 @@
+mod challenge_cache;
 mod connection;
+mod query_cache;
 
 use std::sync::Arc;
 
@@ -10,20 +12,28 @@ use crate::{
     server::connection::{Connection, CONNECTION_POOL},
 };
 
+use self::{challenge_cache::ChallengeCache, query_cache::QueryCacheManager};
+
 pub struct SteamQueryCacheServer {
     config: ServerConfig,
     client: Arc<SteamQueryClient>,
     socket: Arc<UdpSocket>,
+    challenge_cache: Arc<ChallengeCache>,
+    query_cache: Arc<QueryCacheManager>,
 }
 
 impl SteamQueryCacheServer {
     pub async fn new(config: ServerConfig) -> std::io::Result<Self> {
-        let socket: UdpSocket = UdpSocket::bind(config.bind.clone()).await?;
-        let client: SteamQueryClient = SteamQueryClient::new(config.host.clone()).await?;
+        let socket: Arc<UdpSocket> = Arc::new(UdpSocket::bind(config.bind.clone()).await?);
+        let client: Arc<SteamQueryClient> = Arc::new(SteamQueryClient::new(config.host.clone()).await?);
+        let challenge_cache: Arc<ChallengeCache> = Arc::new(ChallengeCache::new().await);
+        let query_cache: Arc<QueryCacheManager> = Arc::new(QueryCacheManager::new(client.clone()));
         Ok(Self {
             config,
-            socket: Arc::new(socket),
-            client: Arc::new(client),
+            socket,
+            client,
+            challenge_cache,
+            query_cache,
         })
     }
 
@@ -59,8 +69,14 @@ impl SteamQueryCacheServer {
                     }
                     None => {
                         log::info!("New connection from {}", addr);
-                        let connection =
-                            Connection::new(self.socket.clone(), self.client.clone(), addr).await;
+                        let connection = Connection::new(
+                            self.socket.clone(),
+                            self.client.clone(),
+                            addr,
+                            self.challenge_cache.clone(),
+                            self.query_cache.clone(),
+                        )
+                        .await;
                         tx = connection.tx.clone();
                         connection.start().await;
                     }
